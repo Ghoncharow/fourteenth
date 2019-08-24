@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "builds": [{ "src": "index.js", "use": "@now/node-server" }],
+  "routes": [
+    {
+      "src": "/api/cats(/.*)?",
+      "dest": "/index.js",
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    {
+      "src": "/login",
+      "dest": "/index.js",
+      "methods": ["GET", "POST"]
+    },
+    {
+      "src": "/logout",
+      "dest": "/index.js",
+      "methods": ["GET", "POST"]
+    },
+    {
+      "src": "/registration",
+      "dest": "/index.js",
+      "methods": ["GET", "POST"]
+    }
+  ]
+}

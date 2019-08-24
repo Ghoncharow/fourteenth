@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>  
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>  
+    <style>
+        #margin1 {
+            margin: 0px 40px 0px 40px;
+     /* Задаем отступы */
+       }
+        input.form-control {
+         width: 100%; /* Ширина поля в пикселах */
+         margin-bottom: 10px;
+        } 
+        a.btn{
+          margin-left: 50px;
+        }
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <div class="container" ng-app="myApp">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="page-header">
+              <h1>{{ title }}</h1>
+            </div>
+          </div>
+          
+          <div ui-view></div>
+          
+        </div>
+        
+        <script type="text/ng-template" id="login.html">
+          <div class="col-md-12">
+            <h3>Login Page</h3>
+            		
+            <form ng-submit="formSubmit()" class="form">
+              <div class="col-md-5">
+                <div class="form-group">
+                  <input type="text" class="form-control" ng-model="username" placeholder="username" required=""/>
+                </div> 
+      
+                <div class="form-group">
+                  <input type="password" class="form-control" ng-model="password" placeholder="password" required=""/>
+                </div>
+                <div class="form-group"> 
+                  <button type="submit" class="btn btn-success">Login</button>                                   
+                </div>	
+                <a ui-sref="register">Registration</a> <br/>
+		            <span class="text-danger">{{ error }}</span>
+      
+              </div>
+            </form>
+          </div>
+        </script>
+        
+        <script type="text/ng-template" id="register.html">
+          <div class="col-md-12">
+            <h3>Create your account</h3>
+            
+            <form ng-submit="formSubmit1()" class="form">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <input type="text" class="form-control" ng-model="username1" placeholder="username" required=""/>
+                </div> 
+      
+                <div class="form-group">
+                  <input type="password" class="form-control" ng-model="password1" placeholder="password" required=""/>
+                </div>
+      
+                <div class="form-group">
+                  <button type="submit" class="btn btn-success">Register</button>
+                </div>
+                <a ui-sref="login">Back</a> <br/>
+      
+              </div>
+            </form>
+          </div>
+        </script>
+        
+        <script type="text/ng-template" id="home.html">
+          <div class="col-md-12">            
+            <div id=margin1>
+              <h2>List of cats</h2>
+  <form name="catForm">
+     <input type="hidden" name="id" value="0" />
+   <div class="form-group">
+    <b>Name:</b>
+<input class="form-control" name="name" />
+  <b>Breed:</b>
+    <input class="form-control" name="breed" />
+      <b>Age:</b>
+    <input class="form-control" name="age" />
+                    </div>      
+                    <div class="panel-body">
+                        <b>Buttons for enter:</b>
+          <a ng-click="onSubmit()" class="btn btn-lg btn-primary">Save</a>
+        <a ng-click="onReset()" id="reset" class="btn btn-lg btn-primary">Reset</a>
+          <a ng-click="onClick()" ui-sref="login" class="btn btn-lg btn-primary">Back</a>
+                    </div>
+                </form>
+                <table class="table table-condensed table-striped table-bordered table-hover">
+                    <thead><tr><th>Name</th><th>Breed</th><th>Age of cat</th><th>Action</th></tr></thead>
+                    <tbody>
+                    </tbody>
+                </table>
+              </div>
+          </div>
+        </script>
+      </div>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.3.2/angular-ui-router.js"></script>
+<script src="https://code.angularjs.org/1.2.9/angular-resource.js"></script>
+<script>
+(function() {
+
+  var xhr = new XMLHttpRequest();
+
+  var app = angular.module('myApp', ['ui.router']);
+  
+  app.run(function($rootScope, $location, $state, LoginService) {
+    $rootScope.$on('$stateChangeStart', 
+      function(event, toState, toParams, fromState, fromParams){ 
+      });
+    
+      if(!LoginService.isAuthenticated()) {
+        $state.transitionTo('login');
+      }
+  });
+  
+  app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+    $urlRouterProvider.otherwise('/register');
+    
+    $stateProvider
+      .state('login', {
+        url : '/login',
+        templateUrl : 'login.html',
+        controller : 'LoginController'
+      })
+      .state('register', {
+        url : '/register',
+        templateUrl : 'register.html',
+        controller : 'RegController'
+      })
+      .state('home', {
+        url : '/home',
+        templateUrl : 'home.html',
+        controller : 'HomeController'
+      });
+  }]);
+
+  app.controller('LoginController', function($scope, $rootScope, $stateParams, $state, LoginService) {
+    $rootScope.title = "AngularJS Login Sample";
+    
+    $scope.formSubmit = function() {
+      if (!$scope.username || !$scope.password) return;      
+      var json = JSON.stringify({ name: $scope.username, password: $scope.password });
+        xhr.open("POST", "/login", true);
+        xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
+        xhr.onload = function () {
+          var res = JSON.parse(xhr.responseText);        
+          if(res.auth) {
+            $scope.error = '';
+            $scope.username = '';
+            $scope.password = '';
+            LoginService.get(true);
+            $state.transitionTo('home');
+            // загрузка котиков
+            GetCats();
+          } else {
+            $scope.error = "Incorrect username/password !";
+          }   
+        }
+        xhr.send(json);
+    };
+    
+  });
+  
+  app.controller('HomeController', function($scope, $rootScope, $stateParams, $state, LoginService) {
+    $rootScope.title = "AngularJS Login Sample";
+    $scope.onClick = function (){     
+      var json = JSON.stringify({});
+        xhr.open("POST", "/logout", true);
+        xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
+        LoginService.get(false);
+        xhr.send(json);
+    };
+    $scope.onSubmit = function (){
+      var form = document.forms["catForm"];
+      var id = form.elements["id"].value;
+      var name = form.elements["name"].value;
+      var breed = form.elements["breed"].value;
+      var age = form.elements["age"].value;
+      if (id == 0) CreateCat(name, breed, age);
+      else EditCat(id, name, breed, age);
+    };
+    $scope.onReset = function (){
+      // сброс значений формы
+      reset();
+    };
+    
+  });
+  
+  app.controller('RegController', function($scope, $rootScope, $stateParams, $state, LoginService) {
+    $rootScope.title = "AngularJS Login Sample";
+    
+    $scope.formSubmit1 = function() { 
+      if (!$scope.username1 || !$scope.password1) return;     
+      var json = JSON.stringify({ name: $scope.username1, password: $scope.password1 });
+        xhr.open("POST", "/registration", true);
+        xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
+            $scope.username1 = '';
+            $scope.password1 = '';
+        xhr.send(json);
+    };
+    
+  });
+  
+  app.factory('LoginService', function() {
+
+    var isAuthenticated = false;
+    
+    return {
+      get : function(value) {
+          isAuthenticated = value;
+        return isAuthenticated;
+      },
+      isAuthenticated : function() {
+        return isAuthenticated;
+      }
+    };
+    
+  });
+  
+  // Получение всех пользователей
+          function GetCats() {
+            $.ajax({
+                url: "/api/cats",
+                type: "GET",
+                contentType: "application/json",
+                success: function (cats) {
+                    var rows = "";
+                    $.each(cats, function (index, cat) {
+                        // добавляем полученные элементы в таблицу
+                        rows += row(cat);
+                    })
+                    $("table tbody").append(rows);
+                 }
+            });
+        }
+        // Получение одного пользователя
+        function GetCat(id) {
+            $.ajax({
+                url: "/api/cats/"+id,
+                type: "GET",
+                contentType: "application/json",
+                success: function (cat) {
+                    var form = document.catForm;
+                    form.elements.id.value = cat.id;
+                    form.elements.name.value = cat.name;
+                    form.elements.breed.value = cat.breed;
+                    form.elements.age.value = cat.age;
+                }
+            });
+        }
+        // Добавление пользователя
+        function CreateCat(catName, catBreed, catAge) {
+            $.ajax({
+                url: "api/cats",
+                contentType: "application/json",
+                method: "POST",
+                data: JSON.stringify({
+                    name: catName,
+                    breed: catBreed,
+                    age: catAge
+                }),
+                success: function (cat) {
+                    reset();
+                    $("table tbody").append(row(cat));
+                }
+            })
+        }
+        // Изменение пользователя
+        function EditCat(catId, catName, catBreed, catAge) {
+            $.ajax({
+                url: "api/cats",
+                contentType: "application/json",
+                method: "PUT",
+                data: JSON.stringify({ id: catId, name: catName, breed: catBreed, age: catAge }),
+                success: function (cat) {
+                    reset();
+                    $("tr[data-rowid='" + cat.id + "']").replaceWith(row(cat));
+                }
+            })
+        }
+  
+        // сброс формы
+        function reset() {
+            var form = document.forms["catForm"];
+            form.reset();
+            form.elements["id"].value = 0;
+        }
+  
+        // Удаление пользователя
+        function DeleteCat(id) {
+            $.ajax({
+                url: "api/cats/"+id,
+                contentType: "application/json",
+                method: "DELETE",
+                success: function (cat) {
+                    $("tr[data-rowid='" + cat.id + "']").remove();
+                }
+            })
+        }
+        // создание строки для таблицы
+        var row = function (cat) {
+            return "<tr data-rowid='" + cat.id + "'><td>" + cat.name + "</td>" +
+                   "<td>" + cat.breed + "</td> <td>" + cat.age + "</td>" +
+                   "<td><a class='editLink' data-id='" + cat.id + "'>Edit</a> | " +
+                    "<a class='removeLink' data-id='" + cat.id + "'>Delete</a></td></tr>";
+        }
+  
+        // нажимаем на ссылку Изменить
+        $("body").on("click", ".editLink", function () {
+            var id = $(this).data("id");
+            GetCat(id);
+        });
+        // нажимаем на ссылку Удалить
+        $("body").on("click", ".removeLink", function () {
+            var id = $(this).data("id");
+            DeleteCat(id);
+        });     
+
+})();
+</script>
+</body>
+</html>

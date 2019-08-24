@@ -1,0 +1,17 @@
+{
+  "name": "angular",
+  "version": "1.0.0",
+  "description": "for deploy to zeit.co",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ghoncharow",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-session": "^1.16.2",
+    "mysql2": "^1.6.5"
+  }
+}
